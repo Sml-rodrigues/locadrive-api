@@ -1,6 +1,11 @@
-# 🚗 LocaDrive API 2.0
+# # 🚗 LocaDrive API 2.0
 
-> API RESTful de alta performance para gerenciamento e automação de locação de veículos, desenvolvida com Java 21, Quarkus e PostgreSQL.
+![Java 21](https://img.shields.io/badge/Java-21-orange?style=for-the-badge&logo=openjdk)
+![Quarkus](https://img.shields.io/badge/Quarkus-3.x-blue?style=for-the-badge&logo=quarkus)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15+-blue?style=for-the-badge&logo=postgresql)
+![License MIT](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)
+
+> API RESTful de alta performance para gerenciamento e automação de locação de veículos.
 
 ---
 
