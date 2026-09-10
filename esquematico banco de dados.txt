@@ -1,0 +1,26 @@
+┌──────────────────────────┐          ┌──────────────────────────┐
+│         CLIENTE          │          │         VEICULO          │
+├──────────────────────────┤          ├──────────────────────────┤
+│ id (PK, BIGSERIAL)       │          │ id (PK, BIGSERIAL)       │
+│ cpf (VARCHAR, UNIQUE)    │          │ placa (VARCHAR, UNIQUE)  │
+│ nome (VARCHAR)           │          │ modelo (VARCHAR)         │
+│ email (VARCHAR, UNIQUE)  │          │ marca (VARCHAR)          │
+│ telefone (VARCHAR)       │          │ valor_diaria (NUMERIC)   │
+│ data_cadastro (TIMESTAMP)│          │ status (VARCHAR/ENUM)    │
+└────────────┬─────────────┘          └────────────┬─────────────┘
+             │                                     │
+             │ 1                                   │ 1
+             │                                     │
+             │             ┌───────────────┐       │
+             └────────────>│    LOCACAO    │<──────┘
+                         N ├───────────────┤ N
+                           │ id (PK)       │
+                           │ cliente_id(FK)│
+                           │ veiculo_id(FK)│
+                           │ data_inicio   │
+                           │ data_fim_prev │
+                           │ data_devolucao│
+                           │ valor_total   │
+                           │ valor_multa   │
+                           │ status (ENUM) │
+                           └───────────────┘
