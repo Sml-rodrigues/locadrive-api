@@ -1,78 +1,66 @@
-# locadrive-api
+# 🚗 LocaDrive API 2.0
 
-This project uses Quarkus, the Supersonic Subatomic Java Framework.
+> API RESTful de alta performance para gerenciamento e automação de locação de veículos, desenvolvida com Java 21, Quarkus e PostgreSQL.
 
-If you want to learn more about Quarkus, please visit its website: <https://quarkus.io/>.
+---
 
-## Running the application in dev mode
+## 📌 Sobre o Projeto
 
-You can run your application in dev mode that enables live coding using:
+O **LocaDrive API 2.0** é uma solução moderna para controle operacional de locadoras de veículos. A aplicação gerencia todo o ecossistema do negócio, desde o cadastro e disponibilidade da frota até o controle de clientes, reservas e autenticação segura baseada em funções (*Role-Based Access Control* - RBAC).
 
-```shell script
-./mvnw quarkus:dev
-```
+A API foi projetada focando em alta disponibilidade, baixo consumo de memória (cloud-native) e execução otimizada através do ecossistema **Quarkus**.
 
-> **_NOTE:_**  Quarkus now ships with a Dev UI, which is available in dev mode only at <http://localhost:8080/q/dev/>.
+---
 
-## Packaging and running the application
+## 🚀 Tecnologias e Ferramentas
 
-The application can be packaged using:
+| Categoria | Tecnologia |
+| :--- | :--- |
+| **Linguagem** | Java 21 |
+| **Framework** | Quarkus 3.x |
+| **Persistência / ORM** | Hibernate ORM com Panache |
+| **Banco de Dados** | PostgreSQL |
+| **Segurança** | SmallRye JWT (JSON Web Tokens) |
+| **Migração / Scripts** | Hibernate ORM DDL Auto / Import SQL |
+| **Containers** | Docker & Docker Compose |
+| **Gerenciamento de Dependências** | Apache Maven |
 
-```shell script
-./mvnw package
-```
+---
 
-It produces the `quarkus-run.jar` file in the `target/quarkus-app/` directory.
-Be aware that it’s not an _über-jar_ as the dependencies are copied into the `target/quarkus-app/lib/` directory.
+## 🔒 Requisitos de Segurança & Boas Práticas
 
-The application is now runnable using `java -jar target/quarkus-app/quarkus-run.jar`.
+A segurança da aplicação foi estruturada seguindo rigorosos padrões de mercado para ambientes corporativos:
 
-If you want to build an _über-jar_, execute the following command:
+* **Proteção de Credenciais:** Nenhuma chave privada (`.pem`), arquivo de configuração de ambiente (`.env`) ou credencial de banco de dados é versionada no repositório.
+* **Autenticação Stateless (JWT):** Utilização de par de chaves assimétricas (RSA) `privateKey.pem` e `publicKey.pem` para emissão e validação de tokens JWT.
+* **Controle de Acesso (RBAC):** Restrição de endpoints por perfis de usuário (`@RolesAllowed`) via anotações nativas do Quarkus Security.
+* **Isolamento por Variáveis de Ambiente:** Parâmetros sensíveis e strings de conexão são injetados dinamicamente via `application.properties` utilizando o padrão do MicroProfile Config.
 
-```shell script
-./mvnw package -Dquarkus.package.jar.type=uber-jar
-```
+---
 
-The application, packaged as an _über-jar_, is now runnable using `java -jar target/*-runner.jar`.
+## 🛠️ Arquitetura e Funcionalidades Principais
 
-## Creating a native executable
+* **`AuthResource`**: Gerenciamento de login e emissão de tokens de acesso JWT.
+* **`ClienteResource`**: CRUD completo de clientes com validação de dados cadastrais.
+* **`VeiculoResource`**: Controle de frota, incluindo status de disponibilidade e categoria dos veículos.
+* **`LocacaoResource`**: Processamento de reservas, cálculo de diárias e encerramento de locações.
 
-You can create a native executable using:
+---
 
-```shell script
-./mvnw package -Dnative
-```
+## 📋 Pré-requisitos para Execução
 
-Or, if you don't have GraalVM installed, you can run the native executable build in a container using:
+Antes de começar, garanta que possui as seguintes ferramentas instaladas na sua máquina:
 
-```shell script
-./mvnw package -Dnative -Dquarkus.native.container-build=true
-```
+* [JDK 21](https://adoptium.net/)
+* [Apache Maven 3.9+](https://maven.apache.org/)
+* [PostgreSQL 15+](https://www.postgresql.org/) ou [Docker Desktop / Open Source Engine](https://www.docker.com/)
+* Chaves RSA de segurança para o JWT geradas na pasta de *resources* (`privateKey.pem` e `publicKey.pem`).
 
-You can then execute your native executable with: `./target/locadrive-api-1.0.0-SNAPSHOT-runner`
+---
 
-If you want to learn more about building native executables, please consult <https://quarkus.io/guides/maven-tooling>.
+## ⚙️ Configuração e Execução Local
 
-## Related Guides
-
-- Hibernate Validator ([guide](https://quarkus.io/guides/validation)): Bean validation using Hibernate Validator and Jakarta Validation annotations
-- Hibernate ORM with Panache ([guide](https://quarkus.io/guides/hibernate-orm-panache)): Simplified JPA/Hibernate data access layer with active record and repository patterns
-- JDBC Driver - PostgreSQL ([guide](https://quarkus.io/guides/datasource)): Connect to the PostgreSQL database via JDBC
-
-## Provided Code
-
-### Hibernate ORM
-
-Create your first JPA entity
-
-[Related guide section...](https://quarkus.io/guides/hibernate-orm)
-
-
-[Related Hibernate with Panache section...](https://quarkus.io/guides/hibernate-orm-panache)
-
-
-### RESTEasy JAX-RS
-
-Easily start your RESTful Web Services
-
-[Related guide section...](https://quarkus.io/guides/getting-started#the-jax-rs-resources)
+### 1. Clocar o Repositório
+```bash
+git clone [https://github.com/Sml-rodrigues/locadrive-api.git](https://github.com/Sml-rodrigues/locadrive-api.git)
+cd locadrive-api/locadrive-api
