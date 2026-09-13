@@ -30,4 +30,11 @@ public class LocacaoResource {
         LocacaoResponseDTO response = locacaoService.realizarLocacao(dto);
         return Response.status(Response.Status.CREATED).entity(response).build();
     }
+
+    @POST
+    @Path("/{id}/devolucao")
+    public Response finalizarDevolucao(@PathParam("id") Long id) {
+        LocacaoResponseDTO response = locacaoService.finalizarDevolucao(id);
+        return Response.ok(response).build();
+    }
 }

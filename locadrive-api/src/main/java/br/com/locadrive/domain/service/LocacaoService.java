@@ -43,8 +43,6 @@ public class LocacaoService {
         locacao.veiculo = veiculo;
         locacao.dataInicio = LocalDateTime.now();
         locacao.dataFimPrevista = LocalDateTime.now().plusDays(dto.dias());
-
-        // Atribuição necessária para evitar o erro de NOT NULL na coluna valor_diaria_aplicado
         locacao.valorDiariaAplicado = veiculo.valorDiaria;
 
         if (veiculo.valorDiaria != null) {
@@ -52,6 +50,44 @@ public class LocacaoService {
         }
 
         veiculo.disponivel = false;
+        locacao.persist();
+
+        return LocacaoResponseDTO.fromEntity(locacao);
+    }
+
+    @Transactional
+    public LocacaoResponseDTO finalizarDevolucao(Long id) {
+        Locacao locacao = Locacao.<Locacao>findByIdOptional(id)
+                .orElseThrow(() -> new RegraDeNegocioException("Locação não encontrada com o ID: " + id));
+
+        if ("CONCLUIDA".equals(locacao.status)) {
+            throw new RegraDeNegocioException("Esta locação já foi finalizada.");
+        }
+
+        LocalDateTime dataDevolucaoReal = LocalDateTime.now();
+        locacao.dataDevolucao = dataDevolucaoReal;
+
+        BigDecimal valorMulta = BigDecimal.ZERO;
+
+        if (dataDevolucaoReal.isAfter(locacao.dataFimPrevista)) {
+            long diasAtraso = java.time.Duration.between(locacao.dataFimPrevista, dataDevolucaoReal).toDays();
+            if (diasAtraso == 0) {
+                diasAtraso = 1;
+            }
+
+            BigDecimal valorDiariaComMulta = locacao.valorDiariaAplicado.multiply(new BigDecimal("1.20"));
+            valorMulta = valorDiariaComMulta.multiply(BigDecimal.valueOf(diasAtraso));
+        }
+
+        locacao.valorMulta = valorMulta;
+        BigDecimal valorBase = locacao.valorTotal != null ? locacao.valorTotal : BigDecimal.ZERO;
+        locacao.valorTotal = valorBase.add(valorMulta);
+        locacao.status = "CONCLUIDA";
+
+        if (locacao.veiculo != null) {
+            locacao.veiculo.disponivel = true;
+        }
+
         locacao.persist();
 
         return LocacaoResponseDTO.fromEntity(locacao);

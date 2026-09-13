@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Test;
 import java.math.BigDecimal;
 
 import static io.restassured.RestAssured.given;
+import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.notNullValue;
 
 @QuarkusTest
@@ -79,5 +80,55 @@ class LocacaoResourceTest {
                 .then()
                 .statusCode(201)
                 .body("id", notNullValue());
+    }
+
+    @Test
+    @DisplayName("Deve finalizar uma locação com sucesso ao registrar devolução")
+    @TestSecurity(user = "atendente", roles = {"USER"})
+    void deveFinalizarDevolucaoComSucesso() {
+        var clienteDto = new ClienteRequestDTO(
+                "Cliente Devolucao",
+                "11122233344",
+                "devolucao." + System.currentTimeMillis() + "@email.com",
+                "16999990000"
+        );
+        Long clienteId = given()
+                .contentType(ContentType.JSON)
+                .body(clienteDto)
+                .post("/api/v1/clientes")
+                .then()
+                .statusCode(201)
+                .extract().jsonPath().getLong("id");
+
+        var veiculoDto = new VeiculoRequestDTO(
+                "Corolla",
+                "Toyota",
+                "DEV" + (System.currentTimeMillis() % 10000),
+                2024,
+                new BigDecimal("200.00")
+        );
+        Long veiculoId = given()
+                .contentType(ContentType.JSON)
+                .body(veiculoDto)
+                .post("/api/v1/veiculos")
+                .then()
+                .statusCode(201)
+                .extract().jsonPath().getLong("id");
+
+        var locacaoDto = new LocacaoRequestDTO(clienteId, veiculoId, 3);
+        Long locacaoId = given()
+                .contentType(ContentType.JSON)
+                .body(locacaoDto)
+                .post("/api/v1/locacoes")
+                .then()
+                .statusCode(201)
+                .extract().jsonPath().getLong("id");
+
+        given()
+                .contentType(ContentType.JSON)
+                .when().post("/api/v1/locacoes/" + locacaoId + "/devolucao")
+                .then()
+                .statusCode(200)
+                .body("status", equalTo("CONCLUIDA"));
     }
 }

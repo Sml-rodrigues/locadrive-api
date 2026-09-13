@@ -1,8 +1,6 @@
 package br.com.locadrive.rest.dto;
 
 import br.com.locadrive.domain.model.Locacao;
-import br.com.locadrive.rest.dto.ClienteResponseDTO;
-import br.com.locadrive.rest.dto.VeiculoResponseDTO;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
@@ -12,16 +10,24 @@ public record LocacaoResponseDTO(
         VeiculoResponseDTO veiculo,
         LocalDateTime dataInicio,
         LocalDateTime dataFimPrevista,
-        BigDecimal valorTotal
+        LocalDateTime dataDevolucao,
+        BigDecimal valorDiariaAplicado,
+        BigDecimal valorTotal,
+        BigDecimal valorMulta,
+        String status
 ) {
-    public static LocacaoResponseDTO fromEntity(Locacao entity) {
+    public static LocacaoResponseDTO fromEntity(Locacao locacao) {
         return new LocacaoResponseDTO(
-                entity.id,
-                entity.cliente != null ? ClienteResponseDTO.fromEntity(entity.cliente) : null,
-                entity.veiculo != null ? VeiculoResponseDTO.fromEntity(entity.veiculo) : null,
-                entity.dataInicio,
-                entity.dataFimPrevista,
-                entity.valorTotal
+                locacao.id,
+                locacao.cliente != null ? ClienteResponseDTO.fromEntity(locacao.cliente) : null,
+                locacao.veiculo != null ? VeiculoResponseDTO.fromEntity(locacao.veiculo) : null,
+                locacao.dataInicio,
+                locacao.dataFimPrevista,
+                locacao.dataDevolucao,
+                locacao.valorDiariaAplicado,
+                locacao.valorTotal,
+                locacao.valorMulta,
+                locacao.status
         );
     }
 }
