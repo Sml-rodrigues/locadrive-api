@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Test;
 import java.math.BigDecimal;
 
 import static io.restassured.RestAssured.given;
+import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.notNullValue;
 
@@ -130,5 +131,51 @@ class LocacaoResourceTest {
                 .then()
                 .statusCode(200)
                 .body("status", equalTo("CONCLUIDA"));
+    }
+
+    @Test
+    @DisplayName("Deve retornar 400 Bad Request ao tentar alugar um veículo já alugado")
+    @TestSecurity(user = "gerente", roles = {"ADMIN"})
+    void deveRetornar400AoAlugarVeiculoIndisponivel() {
+        var clienteDto = new ClienteRequestDTO("Cliente Teste 1", "12345678901", "c1." + System.currentTimeMillis() + "@email.com", "16999990001");
+        Long clienteId = given().contentType(ContentType.JSON).body(clienteDto).post("/api/v1/clientes").then().extract().jsonPath().getLong("id");
+
+        var veiculoDto = new VeiculoRequestDTO("Fit", "Honda", "IND" + (System.currentTimeMillis() % 10000), 2022, new BigDecimal("180.00"));
+        Long veiculoId = given().contentType(ContentType.JSON).body(veiculoDto).post("/api/v1/veiculos").then().extract().jsonPath().getLong("id");
+
+        var locacaoDto = new LocacaoRequestDTO(clienteId, veiculoId, 2);
+        given().contentType(ContentType.JSON).body(locacaoDto).post("/api/v1/locacoes").then().statusCode(201);
+
+        given()
+                .contentType(ContentType.JSON)
+                .body(locacaoDto)
+                .when().post("/api/v1/locacoes")
+                .then()
+                .statusCode(400)
+                .body("status", equalTo(400))
+                .body("mensagem", containsString("não está disponível para locação"));
+    }
+
+    @Test
+    @DisplayName("Deve retornar 400 Bad Request ao tentar devolver uma locação já concluída")
+    @TestSecurity(user = "atendente", roles = {"USER"})
+    void deveRetornar400AoDevolverLocacaoJaConcluida() {
+        var clienteDto = new ClienteRequestDTO("Cliente Teste 2", "12345678902", "c2." + System.currentTimeMillis() + "@email.com", "16999990002");
+        Long clienteId = given().contentType(ContentType.JSON).body(clienteDto).post("/api/v1/clientes").then().extract().jsonPath().getLong("id");
+
+        var veiculoDto = new VeiculoRequestDTO("Yaris", "Toyota", "DEV2" + (System.currentTimeMillis() % 10000), 2023, new BigDecimal("190.00"));
+        Long veiculoId = given().contentType(ContentType.JSON).body(veiculoDto).post("/api/v1/veiculos").then().extract().jsonPath().getLong("id");
+
+        var locacaoDto = new LocacaoRequestDTO(clienteId, veiculoId, 3);
+        Long locacaoId = given().contentType(ContentType.JSON).body(locacaoDto).post("/api/v1/locacoes").then().extract().jsonPath().getLong("id");
+        given().contentType(ContentType.JSON).post("/api/v1/locacoes/" + locacaoId + "/devolucao").then().statusCode(200);
+
+        given()
+                .contentType(ContentType.JSON)
+                .when().post("/api/v1/locacoes/" + locacaoId + "/devolucao")
+                .then()
+                .statusCode(400)
+                .body("status", equalTo(400))
+                .body("mensagem", equalTo("Esta locação já foi finalizada."));
     }
 }
