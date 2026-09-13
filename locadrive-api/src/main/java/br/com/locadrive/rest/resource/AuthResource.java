@@ -1,4 +1,4 @@
-package br.com.locadrive.resource;
+package br.com.locadrive.rest.resource;
 
 import io.smallrye.jwt.build.Jwt;
 import jakarta.annotation.security.PermitAll;

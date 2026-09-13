@@ -1,4 +1,4 @@
-package br.com.locadrive.entity;
+package br.com.locadrive.domain.model;
 
 import io.quarkus.hibernate.orm.panache.PanacheEntity;
 import jakarta.persistence.*;
