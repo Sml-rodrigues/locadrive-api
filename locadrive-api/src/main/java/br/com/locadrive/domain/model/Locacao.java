@@ -1,6 +1,6 @@
 package br.com.locadrive.domain.model;
 
-import io.quarkus.hibernate.orm.panache.PanacheEntity;
+import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 
@@ -9,7 +9,11 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "locacoes")
-public class Locacao extends PanacheEntity {
+public class Locacao extends PanacheEntityBase {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    public Long id;
 
     @ManyToOne
     @JoinColumn(name = "cliente_id", nullable = false)
@@ -21,23 +25,24 @@ public class Locacao extends PanacheEntity {
     @NotNull(message = "O veículo é obrigatório")
     public Veiculo veiculo;
 
-    @Column(name = "data_inicio", nullable = false)
+    @NotNull(message = "A data de locação é obrigatória")
+    @Column(name = "data_locacao", nullable = false)
     public LocalDateTime dataInicio = LocalDateTime.now();
 
     @NotNull(message = "A data fim prevista é obrigatória")
     @Column(name = "data_fim_prevista", nullable = false)
     public LocalDateTime dataFimPrevista;
 
-    @Column(name = "data_devolucao")
+    @Column(name = "data_devolucao_real")
     public LocalDateTime dataDevolucao;
 
-    @Column(name = "valor_diaria_aplicado", nullable = false, precision = 10, scale = 2)
+    @Transient
     public BigDecimal valorDiariaAplicado;
 
     @Column(name = "valor_total", precision = 10, scale = 2)
     public BigDecimal valorTotal;
 
-    @Column(name = "valor_multa", precision = 10, scale = 2)
+    @Transient
     public BigDecimal valorMulta = BigDecimal.ZERO;
 
     @Column(nullable = false, length = 20)

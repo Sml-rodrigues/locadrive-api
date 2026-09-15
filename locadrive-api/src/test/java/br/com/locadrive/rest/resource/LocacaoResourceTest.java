@@ -10,6 +10,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
+import java.util.Random;
 
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.CoreMatchers.containsString;
@@ -18,6 +19,14 @@ import static org.hamcrest.CoreMatchers.notNullValue;
 
 @QuarkusTest
 class LocacaoResourceTest {
+
+    private String gerarCpfUnico() {
+        return String.format("%011d", Math.abs(new Random().nextLong() % 100000000000L));
+    }
+
+    private String gerarPlacaUnica() {
+        return "LOC" + (System.currentTimeMillis() % 100000);
+    }
 
     @Test
     @DisplayName("Deve negar acesso ao listar locações sem token JWT (401 Unauthorized)")
@@ -45,7 +54,7 @@ class LocacaoResourceTest {
     void deveCriarLocacaoComSucesso() {
         var clienteDto = new ClienteRequestDTO(
                 "Cliente Teste Locacao",
-                "99988877700",
+                gerarCpfUnico(),
                 "locador." + System.currentTimeMillis() + "@email.com",
                 "11999998888"
         );
@@ -60,7 +69,7 @@ class LocacaoResourceTest {
         var veiculoDto = new VeiculoRequestDTO(
                 "Civic",
                 "Honda",
-                "LOC" + (System.currentTimeMillis() % 10000),
+                gerarPlacaUnica(),
                 2023,
                 new BigDecimal("250.00")
         );
@@ -89,7 +98,7 @@ class LocacaoResourceTest {
     void deveFinalizarDevolucaoComSucesso() {
         var clienteDto = new ClienteRequestDTO(
                 "Cliente Devolucao",
-                "11122233344",
+                gerarCpfUnico(),
                 "devolucao." + System.currentTimeMillis() + "@email.com",
                 "16999990000"
         );
@@ -104,7 +113,7 @@ class LocacaoResourceTest {
         var veiculoDto = new VeiculoRequestDTO(
                 "Corolla",
                 "Toyota",
-                "DEV" + (System.currentTimeMillis() % 10000),
+                gerarPlacaUnica(),
                 2024,
                 new BigDecimal("200.00")
         );
@@ -137,10 +146,10 @@ class LocacaoResourceTest {
     @DisplayName("Deve retornar 400 Bad Request ao tentar alugar um veículo já alugado")
     @TestSecurity(user = "gerente", roles = {"ADMIN"})
     void deveRetornar400AoAlugarVeiculoIndisponivel() {
-        var clienteDto = new ClienteRequestDTO("Cliente Teste 1", "12345678901", "c1." + System.currentTimeMillis() + "@email.com", "16999990001");
+        var clienteDto = new ClienteRequestDTO("Cliente Teste 1", gerarCpfUnico(), "c1." + System.currentTimeMillis() + "@email.com", "16999990001");
         Long clienteId = given().contentType(ContentType.JSON).body(clienteDto).post("/api/v1/clientes").then().extract().jsonPath().getLong("id");
 
-        var veiculoDto = new VeiculoRequestDTO("Fit", "Honda", "IND" + (System.currentTimeMillis() % 10000), 2022, new BigDecimal("180.00"));
+        var veiculoDto = new VeiculoRequestDTO("Fit", "Honda", gerarPlacaUnica(), 2022, new BigDecimal("180.00"));
         Long veiculoId = given().contentType(ContentType.JSON).body(veiculoDto).post("/api/v1/veiculos").then().extract().jsonPath().getLong("id");
 
         var locacaoDto = new LocacaoRequestDTO(clienteId, veiculoId, 2);
@@ -160,10 +169,10 @@ class LocacaoResourceTest {
     @DisplayName("Deve retornar 400 Bad Request ao tentar devolver uma locação já concluída")
     @TestSecurity(user = "atendente", roles = {"USER"})
     void deveRetornar400AoDevolverLocacaoJaConcluida() {
-        var clienteDto = new ClienteRequestDTO("Cliente Teste 2", "12345678902", "c2." + System.currentTimeMillis() + "@email.com", "16999990002");
+        var clienteDto = new ClienteRequestDTO("Cliente Teste 2", gerarCpfUnico(), "c2." + System.currentTimeMillis() + "@email.com", "16999990002");
         Long clienteId = given().contentType(ContentType.JSON).body(clienteDto).post("/api/v1/clientes").then().extract().jsonPath().getLong("id");
 
-        var veiculoDto = new VeiculoRequestDTO("Yaris", "Toyota", "DEV2" + (System.currentTimeMillis() % 10000), 2023, new BigDecimal("190.00"));
+        var veiculoDto = new VeiculoRequestDTO("Yaris", "Toyota", gerarPlacaUnica(), 2023, new BigDecimal("190.00"));
         Long veiculoId = given().contentType(ContentType.JSON).body(veiculoDto).post("/api/v1/veiculos").then().extract().jsonPath().getLong("id");
 
         var locacaoDto = new LocacaoRequestDTO(clienteId, veiculoId, 3);
