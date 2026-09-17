@@ -36,15 +36,15 @@ public class Locacao extends PanacheEntityBase {
     @Column(name = "data_devolucao_real")
     public LocalDateTime dataDevolucao;
 
-    @Transient
-    public BigDecimal valorDiariaAplicado;
-
     @Column(name = "valor_total", precision = 10, scale = 2)
     public BigDecimal valorTotal;
 
-    @Transient
-    public BigDecimal valorMulta = BigDecimal.ZERO;
-
     @Column(nullable = false, length = 20)
     public String status = "EM_ANDAMENTO";
+
+    @Transient
+    public BigDecimal valorDiariaAplicado;
+
+    @Transient
+    public BigDecimal valorMulta = BigDecimal.ZERO;
 }

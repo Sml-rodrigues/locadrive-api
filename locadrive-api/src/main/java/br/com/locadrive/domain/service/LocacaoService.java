@@ -25,7 +25,12 @@ public class LocacaoService {
     public List<LocacaoResponseDTO> listarTodas() {
         return Locacao.<Locacao>listAll()
                 .stream()
-                .map(LocacaoResponseDTO::fromEntity)
+                .map(loc -> {
+                    if (loc.veiculo != null) {
+                        loc.valorDiariaAplicado = loc.veiculo.valorDiaria;
+                    }
+                    return LocacaoResponseDTO.fromEntity(loc);
+                })
                 .toList();
     }
 
@@ -50,6 +55,8 @@ public class LocacaoService {
         }
 
         veiculo.disponivel = false;
+        veiculo.status = "INDISPONIVEL";
+
         locacao.persist();
 
         return LocacaoResponseDTO.fromEntity(locacao);
@@ -69,13 +76,21 @@ public class LocacaoService {
 
         BigDecimal valorMulta = BigDecimal.ZERO;
 
+        if (locacao.veiculo != null) {
+            locacao.valorDiariaAplicado = locacao.veiculo.valorDiaria;
+        }
+
         if (dataDevolucaoReal.isAfter(locacao.dataFimPrevista)) {
             long diasAtraso = java.time.Duration.between(locacao.dataFimPrevista, dataDevolucaoReal).toDays();
             if (diasAtraso == 0) {
                 diasAtraso = 1;
             }
 
-            BigDecimal valorDiariaComMulta = locacao.valorDiariaAplicado.multiply(new BigDecimal("1.20"));
+            BigDecimal diaria = (locacao.veiculo != null && locacao.veiculo.valorDiaria != null)
+                    ? locacao.veiculo.valorDiaria
+                    : BigDecimal.ZERO;
+
+            BigDecimal valorDiariaComMulta = diaria.multiply(new BigDecimal("1.20"));
             valorMulta = valorDiariaComMulta.multiply(BigDecimal.valueOf(diasAtraso));
         }
 
@@ -86,6 +101,7 @@ public class LocacaoService {
 
         if (locacao.veiculo != null) {
             locacao.veiculo.disponivel = true;
+            locacao.veiculo.status = "DISPONIVEL";
         }
 
         locacao.persist();

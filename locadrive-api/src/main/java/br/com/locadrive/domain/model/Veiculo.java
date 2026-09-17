@@ -9,13 +9,14 @@ import java.math.BigDecimal;
 public class Veiculo extends PanacheEntityBase {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "tb_veiculo_seq_gen")
+    @SequenceGenerator(name = "tb_veiculo_seq_gen", sequenceName = "tb_veiculo_seq", allocationSize = 1)
     public Long id;
 
     @Column(nullable = false, length = 100)
     public String modelo;
 
-    @Column(nullable = false, length = 50)
+    @Column(nullable = false, length = 100)
     public String marca;
 
     @Column(nullable = false, unique = true, length = 10)
